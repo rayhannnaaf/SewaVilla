@@ -2,10 +2,36 @@
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const B = document.body;
+
+  // web storage
+  //local storage
   const store = {
     get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
     set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} }
   };
+
+  // session
+  const ss = {
+    get: k => { try { return sessionStorage.getItem(k); } catch (e) { return null; } },
+    set: (k, v) => { try { sessionStorage.setItem(k, v); } catch (e) {} }
+  };
+
+  // promise
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+
+    // fetch + async
+    // api dibawah hanya untuk testing
+    const API = 'https://jsonplaceholder.typicode.com/posts';
+    const kirim = async data => {
+      const r = await fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    };
+
   const icons = () => window.lucide && lucide.createIcons();
   icons();
 
@@ -41,7 +67,7 @@
   sc && sc.addEventListener('click', () => tog(false));
   document.addEventListener('keydown', e => e.key === 'Escape' && tog(false));
 
-  // tampil sembunyi sandi
+  // tampil sembunyi sandi (EVENT click)
   $$('.eye').forEach(b => b.addEventListener('click', () => {
     const i = b.previousElementSibling, s = i.type === 'password';
     i.type = s ? 'text' : 'password';
@@ -50,9 +76,9 @@
     icons();
   }));
 
-  // validasi form
+  // validasi form (EVENT submit), sekarang async
   const f = $('form[data-form]');
-  if (f) f.addEventListener('submit', e => {
+  if (f) f.addEventListener('submit', async e => {
     e.preventDefault();
     let ok = true;
     const reg = f.dataset.form === 'register';
@@ -73,17 +99,30 @@
       $('.bad input', f).focus();
       return;
     }
-    const btn = $('.btn', f);
+    const btn = $('.btn', f), lbl = $('span', btn), asal = lbl.textContent;
     btn.classList.add('load');
-    $('span', btn).textContent = 'Memproses...';
-    setTimeout(() => {
-      if (reg) { store.set('arus_name', $('[name=nama]', f).value.trim()); location.href = 'login.html'; }
-      else {
-        const em = $('[name=email]', f).value.trim().split('@')[0];
-        store.set('arus_user', store.get('arus_name') || em);
+    lbl.textContent = 'Memproses...';
+    try {
+      const email = $('input[type=email]', f).value.trim();
+      const nama = reg ? $('[name=nama]', f).value.trim() : '';
+      // Promise.all: kirim ke server dan tahan animasi minimal 600 ms, tunggu keduanya selesai
+      await Promise.all([kirim({ email, nama }), wait(600)]);
+      if (reg) {
+        store.set('arus_name', nama);
+        alert('Pendaftaran berhasil. Silakan masuk.'); // popup box 1: alert
+        location.href = 'login.html';
+      } else {
+        store.set('arus_user', store.get('arus_name') || email.split('@')[0]);
         location.href = 'dashboard.html';
       }
-    }, 900);
+    } catch (err) {
+      // Promise ditolak atau jaringan gagal: kembalikan tombol, tampilkan pesan
+      btn.classList.remove('load');
+      lbl.textContent = asal;
+      const w = $('.fld', f);
+      w.classList.add('bad');
+      $('.err', w).textContent = 'Gagal terhubung ke server. Coba lagi.';
+    }
   });
 
   // dashboard
@@ -92,7 +131,12 @@
     $$('[data-user]').forEach(e => e.textContent = nm);
     $$('[data-ini]').forEach(e => e.textContent = nm[0].toUpperCase());
     const out = $('[data-out]');
-    out && out.addEventListener('click', () => { try { localStorage.removeItem('arus_user'); } catch (e) {} });
+    out && out.addEventListener('click', e => {
+      // POPUP BOX 2: confirm, batal = tetap di dashboard
+      if (!confirm('Yakin ingin keluar?')) { e.preventDefault(); return; }
+      try { localStorage.removeItem('arus_user'); } catch (x) {}
+    });
+    // EVENT input: pencarian tabel real time
     const q = $('#q');
     q && q.addEventListener('input', () => {
       const v = q.value.toLowerCase().trim();
@@ -110,11 +154,13 @@
   const nv = $('.nav');
   if (nv) addEventListener('scroll', () => nv.classList.toggle('scrolled', scrollY > 8), { passive: true });
 
-  // filter properti
+  // filter properti, state disimpan di sessionStorage agar bertahan saat refresh
   const cards = $$('.pc');
-  let ft = 'all', qq = '';
+  let ft = ss.get('arus_ft') || 'all', qq = ss.get('arus_q') || '';
   const run = () => {
     let n = 0;
+    ss.set('arus_ft', ft);
+    ss.set('arus_q', qq);
     cards.forEach(c => {
       const ok = (ft === 'all' || c.dataset.type === ft) && c.dataset.loc.includes(qq);
       c.hidden = !ok;
@@ -136,12 +182,26 @@
     run();
     $('#properti').scrollIntoView({ behavior: 'smooth' });
   });
+  // pulihkan filter tersimpan (hanya jika sebelumnya diubah)
+  if (cards.length && (ft !== 'all' || qq)) {
+    $$('.tabs button').forEach(x => x.classList.toggle('on', x.dataset.f === ft));
+    if (sf) $('[name=lokasi]', sf).value = qq;
+    run();
+  }
 
-  // buletin footer
+  // buletin footer: fetch async
   const nb = $('.nl button');
-  if (nb) nb.addEventListener('click', () => {
+  if (nb) nb.addEventListener('click', async () => {
     const i = $('.nl input'), ok = /^\S+@\S+\.\S+$/.test(i.value);
-    if (ok) i.value = '';
-    i.placeholder = ok ? 'Terima kasih, sudah terdaftar.' : 'Format email belum benar.';
+    if (!ok) { i.placeholder = 'Format email belum benar.'; return; }
+    nb.disabled = true;
+    try {
+      await kirim({ email: i.value.trim() });
+      i.value = '';
+      i.placeholder = 'Terima kasih, sudah terdaftar.';
+    } catch (err) {
+      i.placeholder = 'Gagal terhubung, coba lagi.';
+    }
+    nb.disabled = false;
   });
 })();

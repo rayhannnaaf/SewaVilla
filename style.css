@@ -261,3 +261,20 @@ tbody tr:hover{background:var(--bg)}
 .srch-f,.pgrid{grid-template-columns:1fr}
 .pc:first-child{grid-column:auto}
 .ft-bot{flex-direction:column;align-items:flex-start}}
+
+.btn:disabled{opacity:.6;cursor:wait;transform:none;box-shadow:none;pointer-events:none}
+
+/* varian tombol */
+.btn.ghost{background:#fff;color:var(--blue-d);border-color:var(--blue)}
+.btn.ghost:hover{background:var(--tint)}
+.btn.small{padding:8px 16px;font-size:14px}
+
+.link{background:none;border:0;color:var(--blue-d);padding:6px 10px;border-radius:var(--r);font-weight:500}
+.link:hover{background:var(--tint)}
+
+.msg{min-height:1.4em;color:#b03225;font-size:14px}
+.msg.ok{color:#1f7a45}
+.hint{color:var(--mut);font-size:14px}
+
+.meter{height:6px;background:var(--tint);border-radius:99px;overflow:hidden}
+.meter span{display:block;height:100%;width:0;background:var(--blue);transition:width .3s var(--ease)}
