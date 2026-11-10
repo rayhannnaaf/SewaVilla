@@ -1,14 +1,10 @@
-<!DOCTYPE html>
-<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Singgah | Sewa rumah dan villa</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"></head>
-<body data-page="landing">
-<div class="topbar"><div class="wrap"><span><i data-lucide="tag"></i>Diskon 15% untuk menginap 3 malam atau lebih</span><span class="tb2"><i data-lucide="phone"></i>+62 812 0000 1234</span></div></div>
-<header class="nav"><div class="wrap">
-<a href="index.html" class="logo"><b></b>Singgah</a>
-<button class="burger" aria-label="Buka menu" aria-expanded="false"><i data-lucide="menu"></i></button>
-<nav class="links"><a href="#properti">Properti</a><a href="#kenapa">Keunggulan</a><a href="#mitra">Jadi mitra</a><a href="login.html">Masuk</a><a href="register.html" class="btn p">Daftar gratis</a></nav>
-</div></header>
+<?php
+require __DIR__ . '/includes/init.php';
+$title = 'Singgah | Sewa rumah dan villa';
+$page = 'landing';
+require __DIR__ . '/includes/head.php';
+require __DIR__ . '/includes/nav.php';
+?>
 <main>
 <section class="hero"><div class="wrap">
 <div>
@@ -59,13 +55,13 @@
 
 <section class="band" id="mitra"><div class="wrap rv">
 <div><h2>Punya rumah atau villa yang sering kosong?</h2><p>Pasang di Singgah. Kami urus pemesanan, kamu cukup menyambut tamunya.</p></div>
-<a class="btn w" href="register.html"><span>Jadi mitra</span><i data-lucide="arrow-right"></i></a>
+<a class="btn w" href="register.php"><span>Jadi mitra</span><i data-lucide="arrow-right"></i></a>
 </div></section>
 </main>
 
 <footer class="ft"><div class="wrap">
 <div class="ft-top">
-<div class="ft-brand"><a href="index.html" class="logo"><b></b>Singgah</a>
+<div class="ft-brand"><a href="index.php" class="logo"><b></b>Singgah</a>
 <p>Rumah dan villa pilihan untuk liburan keluarga, kerja dari jauh, dan akhir pekan yang tidak direncanakan.</p>
 <div class="nl"><input type="email" placeholder="Email untuk kabar promo" aria-label="Email untuk kabar promo"><button class="btn w" aria-label="Berlangganan"><i data-lucide="send"></i></button></div>
 <p class="nl-msg" role="status" aria-live="polite"></p></div>
@@ -77,5 +73,4 @@
 <div class="ft-bot"><span>© 2026 Singgah. Dibuat di Indonesia.</span>
 <div class="soc"><a href="#" aria-label="Instagram"><i data-lucide="instagram"></i></a><a href="#" aria-label="Facebook"><i data-lucide="facebook"></i></a><a href="#" aria-label="Twitter"><i data-lucide="twitter"></i></a><a href="#" aria-label="YouTube"><i data-lucide="youtube"></i></a></div></div>
 </div></footer>
-<script src="https://cdn.jsdelivr.net/npm/lucide@0.263.1/dist/umd/lucide.min.js"></script><script src="script.js"></script>
-</body></html>
+<?php require __DIR__ . '/includes/scripts.php'; ?>

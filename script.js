@@ -3,21 +3,11 @@
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const B = document.body;
 
-  // web storage
-  //local storage
-  const store = {
-    get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
-    set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} }
-  };
-
   // session
   const ss = {
     get: k => { try { return sessionStorage.getItem(k); } catch (e) { return null; } },
     set: (k, v) => { try { sessionStorage.setItem(k, v); } catch (e) {} }
   };
-
-  // promise
-  const wait = ms => new Promise(r => setTimeout(r, ms));
 
     // fetch + async
     // api dibawah hanya untuk testing
@@ -76,10 +66,10 @@
     icons();
   }));
 
-  // validasi form (EVENT submit), sekarang async
+  // validasi form di sisi klien (EVENT submit). Jika lolos, form dikirim ke PHP (method POST);
+  // PHP memvalidasi ulang, menyimpan data, dan mengatur session/cookie.
   const f = $('form[data-form]');
-  if (f) f.addEventListener('submit', async e => {
-    e.preventDefault();
+  if (f) f.addEventListener('submit', e => {
     let ok = true;
     const reg = f.dataset.form === 'register';
     $$('.fld', f).forEach(w => {
@@ -95,47 +85,19 @@
       if (m) ok = false;
     });
     if (!ok) {
+      e.preventDefault();
       f.classList.remove('shake'); void f.offsetWidth; f.classList.add('shake');
       $('.bad input', f).focus();
       return;
     }
-    const btn = $('.btn', f), lbl = $('span', btn), asal = lbl.textContent;
+    // lolos: tampilkan status memproses, lalu biarkan browser mengirim form ke server
+    const btn = $('.btn', f), lbl = $('span', btn);
     btn.classList.add('load');
     lbl.textContent = 'Memproses...';
-    try {
-      const email = $('input[type=email]', f).value.trim();
-      const nama = reg ? $('[name=nama]', f).value.trim() : '';
-      // Promise.all: kirim ke server dan tahan animasi minimal 600 ms, tunggu keduanya selesai
-      await Promise.all([kirim({ email, nama }), wait(600)]);
-      if (reg) {
-        store.set('arus_name', nama);
-        alert('Pendaftaran berhasil. Silakan masuk.'); // popup box 1: alert
-        location.href = 'login.html';
-      } else {
-        store.set('arus_user', store.get('arus_name') || email.split('@')[0]);
-        location.href = 'dashboard.html';
-      }
-    } catch (err) {
-      // Promise ditolak atau jaringan gagal: kembalikan tombol, tampilkan pesan
-      btn.classList.remove('load');
-      lbl.textContent = asal;
-      const w = $('.fld', f);
-      w.classList.add('bad');
-      $('.err', w).textContent = 'Gagal terhubung ke server. Coba lagi.';
-    }
   });
 
-  // dashboard
+  // dashboard: nama pengguna sudah dirender PHP dari $_SESSION
   if (B.dataset.page === 'dash') {
-    const nm = store.get('arus_user') || 'Tamu';
-    $$('[data-user]').forEach(e => e.textContent = nm);
-    $$('[data-ini]').forEach(e => e.textContent = nm[0].toUpperCase());
-    const out = $('[data-out]');
-    out && out.addEventListener('click', e => {
-      // POPUP BOX 2: confirm, batal = tetap di dashboard
-      if (!confirm('Yakin ingin keluar?')) { e.preventDefault(); return; }
-      try { localStorage.removeItem('arus_user'); } catch (x) {}
-    });
     // EVENT input: pencarian tabel real time
     const q = $('#q');
     q && q.addEventListener('input', () => {
@@ -149,6 +111,11 @@
       $('.empty').style.display = n ? 'none' : 'block';
     });
   }
+
+  // konfirmasi logout (POPUP BOX: confirm). logout.php yang menghapus session di server
+  $$('[data-out]').forEach(a => a.addEventListener('click', e => {
+    if (!confirm('Yakin ingin keluar?')) e.preventDefault();
+  }));
 
   // header bayangan saat scroll
   const nv = $('.nav');

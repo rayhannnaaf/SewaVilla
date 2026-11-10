@@ -1,24 +1,30 @@
-<!DOCTYPE html>
-<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dashboard | Singgah</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"></head>
-<body data-page="dash"><div class="app">
+<?php
+require __DIR__ . '/includes/init.php';
+require_login(); // belum login -> kembali ke login.php
+$nama = $_SESSION['user']['nama'];
+$ini = inisial($nama);
+$title = 'Dashboard | Singgah';
+$page = 'dash';
+require __DIR__ . '/includes/head.php';
+?><div class="app">
 <aside class="sb">
-<a href="index.html" class="logo"><b></b>Singgah</a>
+<a href="index.php" class="logo"><b></b>Singgah</a>
 <a href="#" class="on"><i data-lucide="layout-dashboard"></i>Ringkasan</a>
 <a href="#"><i data-lucide="home"></i>Properti</a>
 <a href="#"><i data-lucide="list-checks"></i>Pemesanan</a>
 <a href="#"><i data-lucide="calendar"></i>Kalender</a>
 <a href="#"><i data-lucide="star"></i>Ulasan</a>
 <a href="#"><i data-lucide="settings"></i>Pengaturan</a>
-<a href="login.html" class="out" data-out><i data-lucide="log-out"></i>Keluar</a>
+<a href="logout.php" class="out" data-out><i data-lucide="log-out"></i>Keluar</a>
 </aside>
 <div class="main">
 <header class="top">
 <button class="menu" aria-label="Buka menu" aria-expanded="false"><i data-lucide="menu"></i></button>
 <div class="srch"><i data-lucide="search"></i><input id="q" type="search" placeholder="Cari tamu atau properti" aria-label="Cari pemesanan"></div>
-<div class="me"><span data-user>Tamu</span><div class="av" data-ini>T</div></div>
+<div class="me"><span data-user><?= e($nama) ?></span><div class="av" data-ini><?= e($ini) ?></div></div>
 </header>
 <div class="pg">
-<h1 class="rv">Selamat datang, <span data-user>Tamu</span></h1>
+<h1 class="rv">Selamat datang, <span data-user><?= e($nama) ?></span></h1>
 <p class="sub rv" style="--d:.05s">Ringkasan pemesanan dan hunian minggu ini.</p>
 <div class="kpi">
 <div class="k rv"><span>Pemesanan aktif</span><b data-count="24">24</b><em>5 baru hari ini</em></div>
@@ -48,5 +54,4 @@
 <p class="empty">Tidak ada pemesanan yang cocok dengan pencarian.</p></div>
 </div></div></div>
 <div class="scrim"></div>
-<script src="https://cdn.jsdelivr.net/npm/lucide@0.263.1/dist/umd/lucide.min.js"></script><script src="script.js"></script>
-</body></html>
+<?php require __DIR__ . '/includes/scripts.php'; ?>
